@@ -74,7 +74,7 @@ class Faculty(CustomUser):
 
 
 class OTPVerification(models.Model):
-    email=models.EmailField(unique=True,null=True)
+    email=models.EmailField(null=True)
     otp = models.CharField(max_length=6,null=True,blank=True,unique=True)
     otp_expiration = models.DateTimeField(null=True,blank=True)
     is_verified = models.BooleanField(default=False)
