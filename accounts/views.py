@@ -15,10 +15,11 @@ from rest_framework import status
 
 
 class LanguageView(APIView):
-    def get(self,request,*args,**kwargs):
+    def get(self,request,args,*kwargs):
         try:
-            lang=Language.objects.all()
+            lang=Language.objects.all() 
             ser=LanguageSerializer(lang,many=True)
+            print(ser.data)
             return Response(data={"Status":"Success","Msg":"Available Languages....","Languages":ser.data},status=status.HTTP_200_OK)
         except Language.DoesNotExist:
             return Response(data={"Status":"Failed","Msg":"No Languages Available......"},status=status.HTTP_204_NO_CONTENT)
@@ -52,6 +53,7 @@ class SendOTPView(APIView):
             )
             return Response(data={"Status":"Success","Msg":"OTP Send Successfully!!!!"},status=status.HTTP_200_OK)
         else:
+            print(ser.errors)
             return Response(data={"Status":"Failed","errors":ser.errors},status=status.HTTP_400_BAD_REQUEST)
         
 
@@ -68,10 +70,21 @@ class VerifyOTPView(APIView):
         if ser.is_valid():
             email=ser.validated_data.get('email')
             otp=ser.validated_data.get('otp')
+            print("otp===",otp)
             try:
-                verification = OTPVerification.objects.get(email=email)
-                verification.verify_otp(otp)
-                return Response(data={"Status":"Success","Msg":"OTP Verified!!!","Email":verification.email,"User OTP":otp},status=status.HTTP_200_OK)
+                
+                verification = OTPVerification.objects.filter(email=email).latest()
+                if verification and verification.otp and verification.otp_expiration:
+                    print("otp",verification.otp)
+                    
+                    if verification.otp == otp and verification.otp_expiration > timezone.now():
+                        print()
+                        print("checked")
+                        verification.otp = None
+                        verification.otp_expiration = None
+                        verification.is_verified = True
+                        verification.save()
+                return Response(data={"Status":"Success","Msg":"OTP Verified!!!","Email":verification.email},status=status.HTTP_200_OK)
             except OTPVerification.DoesNotExist:
                 return Response(data={"Status":"Failed","Msg":"Email invalid or OTP Expired!!"},status=status.HTTP_408_REQUEST_TIMEOUT)
         else:
@@ -91,10 +104,13 @@ class RegistrationStudentView(APIView):
         if ser.is_valid():
             try:
                 email=ser.validated_data.get('email')
-                verify_email=OTPVerification.objects.get(email=email)
-                if verify_email.is_verified:
+                verify_email=OTPVerification.objects.filter(email=email).latest()
+                print(verify_email)
+                if verify_email and verify_email.is_verified:
                     ser.save()
-                    return Response(data={"Status":"Success","Msg":"Registration Successfull!!!!","data":ser.data},status=status.HTTP_201_CREATED)
+                    return Response(data={"Status": "Success", "Msg": "Registration Successful!!!!", "data": ser.data}, status=status.HTTP_201_CREATED)
+                else:
+                    return Response(data={"Status": "Failed", "Msg": "Email is not verified or does not exist."}, status=status.HTTP_401_UNAUTHORIZED)
             except OTPVerification.DoesNotExist:
                 return Response(data={"Status":"Failed","Msg":"Email is Not Verified...."},status=status.HTTP_401_UNAUTHORIZED)
         else:
@@ -116,7 +132,7 @@ class RegistrationFacultyView(APIView):
         if ser.is_valid():
             try:
                 email=ser.validated_data.get('email')
-                verify_email=OTPVerification.objects.get(email=email)
+                verify_email=OTPVerification.objects.filter(email=email).latest()
                 if verify_email.is_verified:
                     ser.save()
                     return Response(data={"Status":"Success","Msg":"Registration Successfull!!!","data":ser.data},status=status.HTTP_201_CREATED)
@@ -132,11 +148,13 @@ class LoginView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         try:
             serializer = self.get_serializer(data=request.data)
+            print(serializer)
             serializer.is_valid(raise_exception=True)
             data = serializer.validated_data
             data['Status'] = 'Success'
             return Response(data={"Msg":"Login Success!!!","data":data}, status=status.HTTP_200_OK)
         except Exception as e:
+            print(str(e))
             return Response(data={'Status': 'Failed', 'Msg': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
         
@@ -157,4 +175,4 @@ class FacultiesView(APIView):
             ser=RegistrationFacultySer(faculty,many=True)
             return Response(data={"Status":"Success","Msg":"All Faculties Details!!!","data":ser.data},status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(data={"Status":"Failed","Msg":str(e)},status=status.HTTP_404_NOT_FOUND)        
+            return Response(data={"Status":"Failed","Msg":str(e)},status=status.HTTP_404_NOT_FOUND)

@@ -7,7 +7,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 class LanguageSerializer(serializers.ModelSerializer):
     class Meta:
         model=Language
-        fields='__all__'
+        fields='_all_'
         
         
 class OTPVerificationSer(serializers.ModelSerializer):
@@ -41,7 +41,7 @@ class RegistrationFacultySer(serializers.ModelSerializer):
     language_title = serializers.ReadOnlyField(source ="language.title")
     class Meta:
         model=Faculty
-        fields=['language','language_title','usertype','faculty_name','place','email','password','rating','title','certification','experience','price','status']
+        fields=['id','language','language_title','usertype','faculty_name','place','email','password','rating','title','certification','experience','price','status']
         
     def create(self,validated_data):
         return Faculty.objects.create_user(usertype="Faculty",**validated_data)
@@ -78,4 +78,4 @@ class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = '_all_'
