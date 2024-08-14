@@ -62,6 +62,18 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
+
+class Category(models.Model):
+    cat_name = models.CharField(max_length=100)
+    cat_img = models.FileField(upload_to="Category Images")
+
+    def _str_(self):
+        return self.cat_name
+
+    class Meta:
+        verbose_name = "Category"
+        verbose_name_plural = "Categories"
+
 class Faculty(CustomUser):
     faculty_name = models.CharField(max_length=100)
     rating = models.FloatField()
@@ -70,6 +82,7 @@ class Faculty(CustomUser):
     experience = models.CharField(max_length=200)
     price = models.BigIntegerField()
     status = models.BooleanField(default=True)
+    category=models.ForeignKey(Category,on_delete=models.CASCADE,related_name="faculty_cat",null=True)
 
     def _str_(self):
         return self.name
@@ -102,14 +115,31 @@ class OTPVerification(models.Model):
                 return True
         return False
 
+        
+        
+class UserRequest(models.Model):
+    user=models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name="userrequest_user")
+    faculty=models.ForeignKey(Faculty,on_delete=models.CASCADE,related_name="userrequest_faculty")
+    options=(
+        ("Accepted","Accepted"),
+        ("Rejected","Rejected"),
+        ("Pending","Pending"),
+    )
+    status=models.CharField(max_length=100,choices=options)
+    
 
-class Category(models.Model):
-    cat_name = models.CharField(max_length=100)
-    cat_img = models.FileField(upload_to="Category Images")
+class FacultyMeetings(models.Model):
+    faculty=models.ForeignKey(Faculty,on_delete=models.CASCADE,related_name="faculty_meetings")
+    meeting_title = models.CharField(max_length=200)
+    meeting_link = models.CharField(max_length=500)
+    
+    def __str__(self):
+        return self.meeting_title
 
-    def _str_(self):
-        return self.cat_name
-
-    class Meta:
-        verbose_name = "Category"
-        verbose_name_plural = "Categories"
+class FacultyVideos(models.Model):
+    faculty=models.ForeignKey(Faculty,on_delete=models.CASCADE,related_name="faculty_videos")
+    video_title = models.CharField(max_length=200)
+    video_link = models.CharField(max_length=500)
+    
+    def __str__(self):
+        return self.video_title

@@ -7,7 +7,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 class LanguageSerializer(serializers.ModelSerializer):
     class Meta:
         model=Language
-        fields='_all_'
+        fields='__all__'
         
         
 class OTPVerificationSer(serializers.ModelSerializer):
@@ -41,7 +41,7 @@ class RegistrationFacultySer(serializers.ModelSerializer):
     language_title = serializers.ReadOnlyField(source ="language.title")
     class Meta:
         model=Faculty
-        fields=['id','language','language_title','usertype','faculty_name','place','email','password','rating','title','certification','experience','price','status']
+        fields=['id','language','category','language_title','usertype','faculty_name','place','email','password','rating','title','certification','experience','price','status']
         
     def create(self,validated_data):
         return Faculty.objects.create_user(usertype="Faculty",**validated_data)
@@ -78,4 +78,23 @@ class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '_all_'
+        fields = '__all__'
+        
+        
+class UserRequestSer(serializers.ModelSerializer):
+    user=RegistrationSerStudent()
+    faculty=RegistrationFacultySer()
+    class Meta:
+        model = UserRequest
+        fields = '__all__'
+        
+    
+class FacultyMeetingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FacultyMeetings
+        fields = '__all__'
+    
+class FacultyVideosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FacultyVideos
+        fields = '__all__'

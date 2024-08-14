@@ -176,3 +176,80 @@ class FacultiesView(APIView):
             return Response(data={"Status":"Success","Msg":"All Faculties Details!!!","data":ser.data},status=status.HTTP_200_OK)
         except Exception as e:
             return Response(data={"Status":"Failed","Msg":str(e)},status=status.HTTP_404_NOT_FOUND)
+        
+
+class UserRequest_FacultyView(APIView):
+    def get(self,request,pk):
+        try:
+            user_id=request.user.id
+            user=CustomUser.objects.get(id=user_id)
+            print(user)
+            faculty = Faculty.objects.get(id=pk)
+            print(faculty)
+            if UserRequest.objects.get(user=user,faculty=faculty):
+                return Response(data={"Status":"Failed","Msg":"You have already requested this faculty"},status=status.HTTP_400_BAD_REQUEST)
+            else:
+                req=UserRequest.objects.create(user=user,faculty=faculty,status="Pending")
+                ser=UserRequestSer(req)
+                return Response(data={"Status":"Success","Msg":"Request Details!!!","data":ser.data},status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(data={"Status":"Failed","Msg":str(e)},status=status.HTTP_404_NOT_FOUND)
+
+class UserRequestGETView(APIView):
+    def get(self,request):
+        try:
+            user_id=request.user.id
+            user=CustomUser.objects.get(id=user_id)
+            req=UserRequest.objects.filter(user=user)
+            ser=UserRequestSer(req,many=True)
+            return Response(data={"Status":"Success","Msg":"User Request See Here...!!!","data":ser.data},status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(data={"Status":"Failed","Msg":str(e)},status=status.HTTP_404_NOT_FOUND)
+
+
+class Faculty_Request_AcceptView(APIView):
+    def get(self,request,pk):
+        try:
+            request = UserRequest.objects.get(id=pk)
+            request.status = "Accept"
+            request.save()
+            ser=UserRequestSer(request)
+            return Response(data={"Status":"Success","Msg":"Request Accepted  !!!","data":ser.data},status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(data={"Status":"Failed","Msg":str(e)},status=status.HTTP_404_NOT_FOUND)
+
+class Faculty_Request_RejectView(APIView):
+    def get(self,request,pk):
+        try:
+            request = UserRequest.objects.get(id=pk)
+            request.status = "Rejected"
+            request.save()
+            ser=UserRequestSer(request)
+            return Response(data={"Status":"Success","Msg":"Request Rejected !!!","data":ser.data},status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(data={"Status":"Failed","Msg":str(e)},status=status.HTTP_404_NOT_FOUND)
+
+
+class Faculty_MeetingsView(APIView):
+    def get(self,request):
+        try:
+            user_id=request.user.id
+            faculty=Faculty.objects.get(id=user_id)
+            meetings=FacultyMeetings.objects.filter(faculty=faculty)
+            ser=FacultyMeetingsSerializer(meetings,many=True)
+            return Response({"Msg":"My Meetings.........","data":ser.data},status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"Msg":"Something Went Wrong!!!!","Error":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+
+class Faculty_VideosView(APIView):
+    def get(self,request):
+        try:
+            user_id=request.user.id
+            faculty=Faculty.objects.get(id=user_id)
+            videos=FacultyVideos.objects.filter(faculty=faculty)
+            ser=FacultyVideosSerializer(videos,many=True)
+            return Response({"Msg":"My Videos.........","data":ser.data},status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"Msg":"Something Went Wrong!!!!","Error":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
