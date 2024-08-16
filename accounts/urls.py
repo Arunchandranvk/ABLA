@@ -14,6 +14,8 @@ urlpatterns = [
     path('all_requests/',UserRequestGETView.as_view(),name='All_req'),
     path('faculty_accept_request/<int:pk>/',Faculty_Request_AcceptView.as_view(),name='reqaccept_faculty'),
     path('faculty_reject_request/<int:pk>/',Faculty_Request_RejectView.as_view(),name='reqreject_faculty'),
+    path('faculty-videos-add/',Faculty_Videos_add_View.as_view(),name='videos_faculty_add'),
     path('faculty-videos/',Faculty_VideosView.as_view(),name='videos_faculty'),
+    path('faculty-meetings-add/',Faculty_Meeting_add_View.as_view(),name='meeting_faculty_add'),
     path('faculty-meetings/',Faculty_MeetingsView.as_view(),name='meeting_faculty'),
 ]

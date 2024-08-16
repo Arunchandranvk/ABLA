@@ -253,3 +253,39 @@ class Faculty_VideosView(APIView):
         except Exception as e:
             return Response({"Msg":"Something Went Wrong!!!!","Error":str(e)},status=status.HTTP_400_BAD_REQUEST)
         
+        
+
+class Faculty_Meeting_add_View(APIView):
+    @swagger_auto_schema(
+        request_body=FacultyMeetingsSerializer,    
+        responses={
+            200:openapi.Response('Meetings Add Successfull...',FacultyMeetingsSerializer),
+            400: 'Validation errors'
+        }
+    )
+    def post(self,request):
+        ser=FacultyMeetingsSerializer(data=request.data)
+        if ser.is_valid():
+            ser.save()
+            return Response(data={"Status":"Success","Msg":"Meetings Added  Successfull!!!","data":ser.data},status=status.HTTP_201_CREATED)
+        else:
+            return Response(data={"Status":"Failed","Errors":ser.errors},status=status.HTTP_400_BAD_REQUEST)  
+       
+        
+class Faculty_Videos_add_View(APIView):
+    @swagger_auto_schema(
+        request_body=FacultyVideosSerializer,    
+        responses={
+            200:openapi.Response('Meetings Add Successfull...',FacultyVideosSerializer),
+            400: 'Validation errors'
+        }
+    )
+    def post(self,request):
+        ser=FacultyVideosSerializer(data=request.data)
+        if ser.is_valid():
+            ser.save()
+            return Response(data={"Status":"Success","Msg":"Meetings Added  Successfull!!!","data":ser.data},status=status.HTTP_201_CREATED)
+        else:
+            return Response(data={"Status":"Failed","Errors":ser.errors},status=status.HTTP_400_BAD_REQUEST)  
+        
+        
