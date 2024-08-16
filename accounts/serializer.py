@@ -51,10 +51,16 @@ class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
+        try:
+            faculty=Faculty.objects.get(id=user.id)
+            token['category'] = faculty.category.cat_name
+        except Faculty.DoesNotExist:
+            pass
         token['name'] = user.name
         token['place'] = user.place
         token['email'] = user.email
         token['usertype'] = user.usertype
+        
         try:
             token['language'] = user.language.title
         except:
@@ -64,10 +70,16 @@ class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         user=self.user
+        try:
+            faculty=Faculty.objects.get(id=user.id)
+            data['category'] = faculty.category.cat_name
+        except Faculty.DoesNotExist:
+            pass
         data['name'] = user.name
         data['place'] = user.place
         data['email'] = user.email
         data['usertype'] = user.usertype
+        
         try:
             data['language'] = user.language.title
         except:

@@ -15,7 +15,7 @@ from rest_framework import status
 
 
 class LanguageView(APIView):
-    def get(self,request,args,*kwargs):
+    def get(self,request):
         try:
             lang=Language.objects.all() 
             ser=LanguageSerializer(lang,many=True)
@@ -186,14 +186,16 @@ class UserRequest_FacultyView(APIView):
             print(user)
             faculty = Faculty.objects.get(id=pk)
             print(faculty)
-            if UserRequest.objects.get(user=user,faculty=faculty):
-                return Response(data={"Status":"Failed","Msg":"You have already requested this faculty"},status=status.HTTP_400_BAD_REQUEST)
-            else:
-                req=UserRequest.objects.create(user=user,faculty=faculty,status="Pending")
-                ser=UserRequestSer(req)
-                return Response(data={"Status":"Success","Msg":"Request Details!!!","data":ser.data},status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(data={"Status":"Failed","Msg":str(e)},status=status.HTTP_404_NOT_FOUND)
+            data=UserRequest.objects.get(user=user,faculty=faculty)
+                
+            ser=UserRequestSer(data)
+            return Response(data={"Status":"Failed","Msg":"User Already Exist!!!!","data":ser.data})
+        except UserRequest.DoesNotExist:
+            req,created=UserRequest.objects.get_or_create(user=user,faculty=faculty,status="Pending")
+
+            print("created")
+            ser=UserRequestSer(req)
+            return Response(data={"Status":"Success","Msg":"Request Details!!!","data":ser.data},status=status.HTTP_200_OK)
 
 class UserRequestGETView(APIView):
     def get(self,request):
