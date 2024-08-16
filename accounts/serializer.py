@@ -99,7 +99,32 @@ class UserRequestSer(serializers.ModelSerializer):
     class Meta:
         model = UserRequest
         fields = '__all__'
+    
+    
+class AllRequestSer(serializers.ModelSerializer):
+    user =RegistrationSerStudent()
+    faculty = RegistrationFacultySer()
+    meetings = serializers.SerializerMethodField()
+    videos = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = UserRequest
+        fields = ['id','user','faculty','status','meetings','videos']
         
+    def get_meetings(self,obj):
+        print( obj.status)
+        if obj.status == "Accepted":
+            meetings = FacultyMeetings.objects.filter(faculty = obj.faculty)
+            return FacultyMeetingsSerializer(meetings,many=True).data
+        else:
+            pass
+    
+    def get_videos(self,obj):
+        if obj.status == "Accepted":
+            video = FacultyVideos.objects.filter(faculty = obj.faculty)
+            return  FacultyVideosSerializer(video,many=True).data
+        else:
+            pass
     
 class FacultyMeetingsSerializer(serializers.ModelSerializer):
     class Meta:
