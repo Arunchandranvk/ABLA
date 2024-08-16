@@ -156,7 +156,7 @@ class LoginView(TokenObtainPairView):
         except Exception as e:
             print(str(e))
             return Response(data={'Status': 'Failed', 'Msg': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         
 class CategoryView(APIView):
     def get(self,request):
@@ -166,7 +166,7 @@ class CategoryView(APIView):
             return Response(data={"Status":"Success","data":ser.data},status=status.HTTP_200_OK)
         except Exception as e:
             return Response(data={"Status":"Failed","Msg":str(e)},status=status.HTTP_404_NOT_FOUND)
-    
+
 
 class FacultiesView(APIView):
     def get(self,request):
@@ -203,8 +203,27 @@ class UserRequestGETView(APIView):
             user_id=request.user.id
             user=CustomUser.objects.get(id=user_id)
             req=UserRequest.objects.filter(user=user)
+            faculties_accepted = []
+            faculty_meetings = []
+            faculty_videos = []
+            for requests in req:
+                if requests.status == "Accepted":
+                    faculties_accepted.append(requests.faculty.id)
+            print(faculties_accepted)
+            for details in faculties_accepted:
+                print(details)
+                meetings=FacultyMeetings.objects.filter(faculty=details)
+                for i in meetings:
+                    faculty_meetings.append(i)
+                videos=FacultyVideos.objects.filter(faculty=details)
+                for j in videos:
+                    faculty_videos.append(j)
+            print(faculty_videos)
+            print(faculty_meetings)
+            meetings=FacultyMeetingsSerializer(faculty_meetings,many=True)
+            videos=FacultyVideosSerializer(faculty_videos,many=True)
             ser=UserRequestSer(req,many=True)
-            return Response(data={"Status":"Success","Msg":"User Request See Here...!!!","data":ser.data},status=status.HTTP_200_OK)
+            return Response(data={"Status":"Success","Msg":"User Request See Here...!!!","data":ser.data,"Meetings":meetings.data,"Videos":videos.data},status=status.HTTP_200_OK)
         except Exception as e:
             return Response(data={"Status":"Failed","Msg":str(e)},status=status.HTTP_404_NOT_FOUND)
 
@@ -289,5 +308,4 @@ class Faculty_Videos_add_View(APIView):
             return Response(data={"Status":"Success","Msg":"Meetings Added  Successfull!!!","data":ser.data},status=status.HTTP_201_CREATED)
         else:
             return Response(data={"Status":"Failed","Errors":ser.errors},status=status.HTTP_400_BAD_REQUEST)  
-        
-        
+

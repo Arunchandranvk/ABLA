@@ -67,12 +67,12 @@ class Category(models.Model):
     cat_name = models.CharField(max_length=100)
     cat_img = models.FileField(upload_to="Category Images")
 
-    def _str_(self):
-        return self.cat_name
-
     class Meta:
         verbose_name = "Category"
         verbose_name_plural = "Categories"
+        
+    def _str_(self):
+        return self.cat_name
 
 class Faculty(CustomUser):
     faculty_name = models.CharField(max_length=100)
