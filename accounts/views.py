@@ -309,3 +309,13 @@ class Faculty_Videos_add_View(APIView):
         else:
             return Response(data={"Status":"Failed","Errors":ser.errors},status=status.HTTP_400_BAD_REQUEST)  
 
+
+class CategoryWiseFacultyView(APIView):
+    def get(self,request,pk):
+        try:
+            cat_id=Category.objects.get(id=pk)
+            faculty=Faculty.objects.filter(category=cat_id)
+            ser=RegistrationFacultySer(faculty,many=True)
+            return Response({"Status":"Success","data":ser.data},status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"Status":"Failed","Error":str(e)},status=status.HTTP_400_BAD_REQUEST)
